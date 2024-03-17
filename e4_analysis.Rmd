@@ -1,0 +1,590 @@
+---
+title: "commits_fix"
+output: html_document
+date: "2024-03-13"
+---
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(tidyr)
+library(writexl)
+library(rstatix)
+library(dplyr)
+library(ggplot2)
+library(openxlsx)
+```
+
+```{r}
+E4 <- read_xlsx("E4_+Threat+modelling+experiment.xlsx")
+#E4_E<- read_xlsx "E4-+Threat+Modeling-+ Entry+Survey .xlsx" 
+
+
+
+View(E4)  
+
+```
+
+```{r}
+new_E4 <- select( E4, "FamiliaritySTRIDE", "Familiar GitHub","PerceivedCorrect","Process.Correct", "GroupA", "ChatGPT DFD_4", "ChatGPT DFD_5", "ChatGPT DFD_6", "ChatGPT DFD_7", "ChatGPT DFD_8", "ChatGPT DFD_9", "ChatGPT DFD_10", "ChatGPT DFD_11", "ChatGPT DFD_12", "ChatGPT DFD_13",
+                 
+                 "GA-ChatGPT K8_4", "GA-ChatGPT K8_5", "GA-ChatGPT K8_6", "GA-ChatGPT K8_7", "GA-ChatGPT K8_8", "GA-ChatGPT K8_9", "GA-ChatGPT K8_10", "GA-ChatGPT K8_11", "GA-ChatGPT K8_12", "GA-ChatGPT K8_13", 
+                 
+                 "Group B DFD noGPT_15", "Group B DFD noGPT_5", "Group B DFD noGPT_6", "Group B DFD noGPT_7", "Group B DFD noGPT_8", "Group B DFD noGPT_9", "Group B DFD noGPT_10", "Group B DFD noGPT_11", "Group B DFD noGPT_12", "Group B DFD noGPT_13",
+                 
+                 "Group B K8 noGPT_15", "Group B K8 noGPT_5", "Group B K8 noGPT_6", "Group B K8 noGPT_7", "Group B K8 noGPT_8", "Group B K8 noGPT_9", "Group B K8 noGPT_10", "Group B K8 noGPT_11", "Group B K8 noGPT_12", "Group B K8 noGPT_13", 
+                 
+                 "GPT-GitHub-NoDFD_4", "GPT-GitHub-NoDFD_5", "GPT-GitHub-NoDFD_6", "GPT-GitHub-NoDFD_7", "GPT-GitHub-NoDFD_8", "GPT-GitHub-NoDFD_9", "GPT-GitHub-NoDFD_10", "GPT-GitHub-NoDFD_11", "GPT-GitHub-NoDFD_12", "GPT-GitHub-NoDFD_13",
+                 "GPT-K8 NoDFD_4", "GPT-K8 NoDFD_5", "GPT-K8 NoDFD_6", "GPT-K8 NoDFD_7", "GPT-K8 NoDFD_8", "GPT-K8 NoDFD_9", "GPT-K8 NoDFD_10", "GPT-K8 NoDFD_11", "GPT-K8 NoDFD_12", "GPT-K8 NoDFD_13", 
+                 
+                 
+                 "noDFD noGPT GitHub_1", "noDFD noGPT GitHub_2", "noDFD noGPT GitHub_3", "noDFD noGPT GitHub_4", "noDFD noGPT GitHub_5", "noDFD noGPT GitHub_6", "noDFD noGPT GitHub_7", "noDFD noGPT GitHub_8", "noDFD noGPT GitHub_9", "noDFD noGPT GitHub_10", 
+                 
+                 "Exp-K8 NoDFD_15", "Exp-K8 NoDFD_5", "Exp-K8 NoDFD_6", "Exp-K8 NoDFD_7", "Exp-K8 NoDFD_8", "Exp-K8 NoDFD_9", "Exp-K8 NoDFD_10", "Exp-K8 NoDFD_11", "Exp-K8 NoDFD_12", "Exp-K8 NoDFD_13"
+                 ) 
+View (new_E4 )
+
+```
+
+```{r}
+new_E <-  new_E4[-c(1), ]
+new_E <- new_E %>%
+  rename (Groups = GroupA )
+view (new_E) 
+
+```
+
+```{r}
+#demographic variables and perception
+
+
+new_E$`FamiliaritySTRIDE` <- factor( 
+  new_E$`FamiliaritySTRIDE`,
+  levels = c("Disagree", "Neutral", "Agree","Strongly agree") 
+)
+ 
+ggplot(new_E, aes(x = `FamiliaritySTRIDE`, fill = `FamiliaritySTRIDE`)) +
+  geom_bar() +
+  labs(
+    x = "STRIDE Familiarity",
+    title = "Demo1 Barplot"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  
+
+
+new_E$`Familiar GitHub` <- factor(
+  new_E$`Familiar GitHub`,
+  levels = c ("Strongly disagree","Disagree", "Neutral", "Agree","Strongly agree" )
+)
+
+ggplot (new_E,aes(x = `Familiar GitHub`, fill =`Familiar GitHub`))+
+  geom_bar()+
+  labs (
+    x = "GitHub Familiarity",
+    title = "Demo2")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+  
+new_E$`PerceivedCorrect` <- factor(
+  new_E$`PerceivedCorrect`,
+  levels = c ("Neutral", "Easy", "Hard", "Very Hard")
+)
+ 
+
+ggplot (new_E,aes(x = `PerceivedCorrect`, fill = `PerceivedCorrect`))   +
+  geom_bar ()  +
+  labs(
+     x = "Rate of difficulty in marking the correct threat",
+    title = "Perception barplot"
+  )  +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+
+```
+
+```{r}
+#Scatterplot
+
+new_E <- new_E %>%
+          mutate (FamiliaritySTRIDE_numeric = recode (`FamiliaritySTRIDE`,
+                                              
+                               "Disagree" = 1, 
+                               "Neutral" = 2, 
+                               "Agree" = 3,
+                               "Strongly agree" = 4))%>%
+  
+  
+  mutate (Familiar_GitHub_numeric = recode(`Familiar GitHub`, 
+                              "Strongly disagree" = 1, 
+                              "Disagree" = 2, 
+                              "Neutral" = 3, 
+                              "Agree" = 4,
+                              "Strongly agree" = 5)) %>%
+  
+  mutate (PerceivedCorrect_numeric = recode(`PerceivedCorrect`, 
+                              "Neutral" = 1, 
+                              "Easy" = 2, 
+                              "Hard" = 3, 
+                              "Very Hard" = 4))
+                                
+
+ggplot (new_E, aes (x = FamiliaritySTRIDE_numeric, 
+                  y = Familiar_GitHub_numeric,
+                  colour = Familiar_GitHub_numeric))  +
+  geom_point () +
+  labs (
+    X = "STRIDE Familiarity",
+    y = "Familiarity with GitHub",
+    title = "Demograghic scatterplot")
+
+   
+  
+```
+
+```{r}
+# converting confidence level to numeric and finding the median
+Midpoint <- function(range_string) {
+  range_values <- as.numeric(unlist(strsplit(range_string, "-")))
+  Median <- median(range_values,na.rm = TRUE)
+  return(Median)
+}
+new_E <- new_E %>%
+  mutate(confidence_level = sapply(Process.Correct, Midpoint))
+view(new_E)
+
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+#########################ignore this cell
+#new_E <- new_E %>%
+ # pivot_longer(
+ #   cols = matches ("ChatGPT DFD|GA-ChatGPT K8|Group B DFD noGPT|Group B K8 #noGPT|GPT-GitHub-NoDFD|GPT-K8 NoDFD|noDFD noGPT GitHub|Exp-K8 NoDFD") ,
+ #   names_to = "Intervention",
+ #   values_to = "Threats_QualtricID"
+  #)
+   
+#view (new_E )
+
+```
+
+```{r}
+# Initialize counters for correct matches, incorrect matches, and NAs for both GPT and K8
+# Create ground truth vectors for GPT and K8
+gpt_ground_truth <- c("1. ELEVATION-PRIVILEDGED-ACCESS", "2. DISCLOSE-THIRD-PARTY", 
+                      "3. MALICIOUS-CODE-GITHUB", "4. DOS-SERVER", "5. ELEVATION-PRIVILEDGED-REPO", 
+                      "6. ELEVATION-PRIVILEDGED-CODE", "7. EXPLOIT-HTTP-PROTOCOL",
+                      "8. LEAKED-CONFIG-FILE", "9. DOS-REMOTE-REPO", "10. STOLEN-AUTH-INFO")  
+
+k8_ground_truth <- c("1. LEAKED-PRIVILEGE-REMOTE", "2. SPOOFING-AUTH-WORKLOAD", "3. DOS-WORKERNODE",
+                     "4. ELEVATION-PRIVILEGE-MALICIOUS-IMG", "5. EXPLOIT-PRIVILEGED-CONTAINER", 
+                     "6. PORT-JAMMING-NETWORK-POLICIES", "7. LEAKED-SECRET-DOCKERFILE", 
+                     "8. CHAIN-ATTACK-MALICIOUS-INPUTS", "9. UNAUTH-CONFIG-TAMPERING", 
+                     "10. SPOOFING-LAYER-3") 
+
+
+gpt_correct_count <- numeric(nrow(new_E))
+k8_correct_count <- numeric(nrow(new_E))
+gpt_incorrect_count <- numeric(nrow(new_E))
+k8_incorrect_count <- numeric(nrow(new_E))
+gpt_na_count <- numeric(nrow(new_E))
+k8_na_count <- numeric(nrow(new_E))
+
+# Loop through each row of the DataFrame
+for (i in 1:nrow(new_E)) {
+  # Extract GPT and K8 entries for the current row based on the value in the 'Groups' column
+  group <- new_E$Groups[i]
+  
+  if (group == "Group A") {
+    gpt_entries <- unlist(new_E[i, c("ChatGPT DFD_4", "ChatGPT DFD_5", "ChatGPT DFD_6",
+                                      "ChatGPT DFD_7","ChatGPT DFD_8", "ChatGPT DFD_9", 
+                                      "ChatGPT DFD_10", "ChatGPT DFD_11","ChatGPT DFD_12", 
+                                     "ChatGPT DFD_13")])
+    k8_entries <- unlist(new_E[i, c("GA-ChatGPT K8_4", "GA-ChatGPT K8_5", "GA-ChatGPT K8_6",
+                                     "GA-ChatGPT K8_7", "GA-ChatGPT K8_8", "GA-ChatGPT K8_9",
+                                     "GA-ChatGPT K8_10", "GA-ChatGPT K8_11", "GA-ChatGPT K8_12", "GA-ChatGPT K8_13")])  
+  } 
+  
+  else if (group == "Group B") {
+    gpt_entries <- unlist(new_E[i, c("Group B DFD noGPT_15",
+                                     "Group B DFD noGPT_5","Group B DFD noGPT_6", 
+                                     "Group B DFD noGPT_7", "Group B DFD noGPT_8",
+                                     "Group B DFD noGPT_9", "Group B DFD noGPT_10", 
+                                     "Group B DFD noGPT_11", "Group B DFD noGPT_12",
+                                     "Group B DFD noGPT_13")])
+    
+    k8_entries <- unlist(new_E[i, c("Group B K8 noGPT_15", "Group B K8 noGPT_5",
+                                    "Group B K8 noGPT_6", "Group B K8 noGPT_7", 
+                                    "Group B K8 noGPT_8", "Group B K8 noGPT_9",
+                                    "Group B K8 noGPT_10", "Group B K8 noGPT_11",
+                                    "Group B K8 noGPT_12", "Group B K8 noGPT_13")])  
+  } 
+  
+  else if (group == "Group C") {
+    gpt_entries <- unlist(new_E[i, c("GPT-GitHub-NoDFD_4", "GPT-GitHub-NoDFD_5", 
+                                     "GPT-GitHub-NoDFD_6", "GPT-GitHub-NoDFD_7", 
+                                     "GPT-GitHub-NoDFD_8", "GPT-GitHub-NoDFD_9",
+                                     "GPT-GitHub-NoDFD_10", "GPT-GitHub-NoDFD_11",
+                                     "GPT-GitHub-NoDFD_12", "GPT-GitHub-NoDFD_13")])
+    
+    k8_entries <- unlist(new_E[i, c("GPT-K8 NoDFD_4", "GPT-K8 NoDFD_5",
+                                    "GPT-K8 NoDFD_6", "GPT-K8 NoDFD_7","GPT-K8 NoDFD_8",
+                                    "GPT-K8 NoDFD_9", "GPT-K8 NoDFD_10", "GPT-K8 NoDFD_11",
+                                    "GPT-K8 NoDFD_12", "GPT-K8 NoDFD_13")])  
+  }
+  
+  else if (group == "Group D") {
+    gpt_entries <- unlist(new_E[i, c("noDFD noGPT GitHub_1", "noDFD noGPT GitHub_2", 
+                                     "noDFD noGPT GitHub_3","noDFD noGPT GitHub_4", 
+                                     "noDFD noGPT GitHub_5", "noDFD noGPT GitHub_6", 
+                                     "noDFD noGPT GitHub_7", "noDFD noGPT GitHub_8", 
+                                     "noDFD noGPT GitHub_9", "noDFD noGPT GitHub_10")])
+    
+    k8_entries <- unlist(new_E[i, c("Exp-K8 NoDFD_15", "Exp-K8 NoDFD_5", "Exp-K8 NoDFD_6", 
+                                    "Exp-K8 NoDFD_7","Exp-K8 NoDFD_8", "Exp-K8 NoDFD_9",
+                                    "Exp-K8 NoDFD_10", "Exp-K8 NoDFD_11",
+                                    "Exp-K8 NoDFD_12", "Exp-K8 NoDFD_13")])
+  } else {
+    stop(paste("Invalid group:", group))
+  }
+
+  # Count correct matches for GPT and K8
+  gpt_matches <- sum(gpt_entries %in% gpt_ground_truth, na.rm = TRUE)
+  k8_matches <- sum(k8_entries %in%  k8_ground_truth, na.rm = TRUE)  
+
+  # Count incorrect matches for GPT and K8
+  gpt_incorrect_matches <- sum(!(gpt_entries %in% gpt_ground_truth) & !is.na(gpt_entries))
+  k8_incorrect_matches <- sum(!(k8_entries %in% k8_ground_truth) & !is.na(k8_entries))
+  
+  # Count NAs for GPT and K8
+  gpt_na_matches <- sum(is.na(gpt_entries))
+  k8_na_matches <- sum(is.na(k8_entries))
+  
+  # Assign counts to corresponding vectors
+  gpt_correct_count[i] <- gpt_matches
+  k8_correct_count[i] <- k8_matches
+  gpt_incorrect_count[i] <- gpt_incorrect_matches
+  k8_incorrect_count[i] <- k8_incorrect_matches
+  gpt_na_count[i] <- gpt_na_matches
+  k8_na_count[i] <- k8_na_matches
+}
+
+# Add new columns for the counts of correct matches, incorrect matches, and NAs for both GPT and K8
+new_E$GPT_TP <- gpt_correct_count
+new_E$K8_TP <- k8_correct_count
+new_E$GPT_FP <- gpt_incorrect_count
+new_E$K8_FP <- k8_incorrect_count
+new_E$GPT_FN <- gpt_na_count
+new_E$K8_FN <- k8_na_count
+view(new_E)
+
+```
+
+```{r}
+#metrics1
+
+new_E <- new_E %>%
+  rowwise() %>%
+  mutate(gpt_Accuracy = GPT_TP / (GPT_TP + GPT_FN))%>%
+  mutate(k8_Accuracy = K8_TP/ (K8_TP + K8_FN))
+view(new_E)
+```
+
+```{r}
+Analysis_E4 <- select( new_E,Groups, "gpt_Accuracy", "k8_Accuracy", "confidence_level", "FamiliaritySTRIDE_numeric", "Familiar_GitHub_numeric","PerceivedCorrect_numeric")
+
+view(Analysis_E4)
+```
+
+```{r}
+#statistical test
+
+Demo1_stats <- Analysis_E4 %>% 
+  summarise(
+    average_exp = mean(FamiliaritySTRIDE_numeric,na.rm = TRUE),
+    std_dev = sd(FamiliaritySTRIDE_numeric, na.rm = TRUE),
+    median = median(FamiliaritySTRIDE_numeric, na.rm = TRUE),
+    
+  ) 
+print(Demo1_stats)
+
+Demo2_stats <- Analysis_E4 %>% 
+  summarise(
+    average_exp = mean(Familiar_GitHub_numeric,na.rm = TRUE),
+    std_dev = sd(Familiar_GitHub_numeric, na.rm = TRUE),
+    median = median(Familiar_GitHub_numeric, na.rm = TRUE),
+    
+  ) 
+print(Demo2_stats)
+```
+
+```{r}
+#Statistics of intervention
+Interv1_stats <- Analysis_E4 %>% 
+  group_by(Groups)%>%
+  summarise(
+    average_exp = mean(k8_Accuracy,na.rm = TRUE),
+    std_dev = sd(k8_Accuracy, na.rm = TRUE),
+    median = median(k8_Accuracy, na.rm = TRUE),
+    
+  ) 
+print(Interv1_stats)
+
+Interv2_stats <- Analysis_E4 %>%
+  group_by(Groups)%>%
+  summarise(
+    average_exp = mean(confidence_level,na.rm = TRUE),
+    std_dev = sd(confidence_level, na.rm = TRUE),
+    median = median(confidence_level, na.rm = TRUE),
+    
+  ) 
+print(Interv2_stats)
+
+```
+
+```{r}
+#wilcoxon test
+# noDFD&noGTP(D) vs (noDFD&GTP(C) union DFD&GTP(A))
+
+T1 <- new_E[new_E$Groups == "Group D", "k8_Accuracy"]
+print(T1)
+T2 <- new_E[new_E$Groups %in% c("Group C", "Group A"), "k8_Accuracy"]
+print(T2)
+T1 <- as.numeric(unlist(T1))
+T2 <- as.numeric(unlist(T2))
+wilcox.test(T1, T2)
+
+T3 <- new_E[new_E$Groups == "Group D", "confidence_level"]
+T4 <- new_E[new_E$Groups %in% c("Group C", "Group A"), "confidence_level"]
+T3 <- as.numeric(unlist(T3))
+T4 <- as.numeric(unlist(T4))
+wilcox.test(T3, T4)
+
+
+```
+
+```{r}
+#wilcoxon test
+#noDFD&GTP vs DFD&GTP
+G1 <- new_E[new_E$Groups == "Group C", "k8_Accuracy"]
+G2 <- new_E[new_E$Groups == "Group A", "k8_Accuracy"]
+G1 <- as.numeric(unlist(G1))
+G2 <- as.numeric(unlist(G2))
+wilcox.test(G1, G2)
+
+G3 <- new_E[new_E$Groups == "Group C", "confidence_level"]
+G4 <- new_E[new_E$Groups == "Group A", "confidence_level"]
+G3 <- as.numeric(unlist(G3))
+G4 <- as.numeric(unlist(G4))
+wilcox.test(G3, G4)
+```
+
+```{r}
+#WILCOXON TEST
+#noDFD&noGTP vs (DFD&noGTP union DFD&GTP)
+C1 <- new_E[new_E$Groups == "Group D", "k8_Accuracy"]
+C2 <- new_E[new_E$Groups %in% c("Group B", "Group A"), "k8_Accuracy"]
+C1 <- as.numeric(unlist(C1))
+C2 <- as.numeric(unlist(C2))
+wilcox.test(C1, C2)
+
+C3 <- new_E[new_E$Groups == "Group D", "confidence_level"]
+C4 <- new_E[new_E$Groups %in% c("Group B", "Group A"), "confidence_level"]
+C3 <- as.numeric(unlist(C3))
+C4 <- as.numeric(unlist(C4))
+wilcox.test(C3, C4)
+```
+
+```{r}
+#Wilicoxon_Test
+#DFD&noGTP vs DFD&GTP
+D1 <- new_E[new_E$Groups == "Group B", "k8_Accuracy"]
+D2 <- new_E[new_E$Groups == "Group A", "k8_Accuracy"]
+D1 <- as.numeric(unlist(D1))
+D2 <- as.numeric(unlist(D2))
+wilcox.test(D1, D2)
+
+D3 <- new_E[new_E$Groups == "Group B", "confidence_level"]
+D4 <- new_E[new_E$Groups == "Group A", "confidence_level"]
+D3 <- as.numeric(unlist(D3))
+D4 <- as.numeric(unlist(D4))
+wilcox.test(D3, D4)
+
+```
+```{r}
+
+
+
+```
+
+```{r}
+# Boxplots
+  ggplot(Analysis_E4, aes(x = Groups, y = k8_Accuracy, group = Groups, fill = Groups)) +
+  geom_boxplot() +
+  labs(
+    title = "IntervM1 by Groups", x = "Groups", y = "Accuracy"
+  )
+
+ggplot(Analysis_E4, aes(x = Groups, y = confidence_level, group = Groups, fill = Groups)) +
+  geom_boxplot() +
+  labs(
+    title = "IntervM2 by Groups", x = "Groups", y = "confidence_level"
+  )
+
+ggplot(Analysis_E4, aes(x = Groups, y = PerceivedCorrect_numeric, group = Groups, fill = Groups)) +
+  geom_boxplot() +
+  labs(
+    title = "perception by Groups", x = "Groups", y = "perceivedcorrect_numeric"
+  )
+
+```
+
+```{r}
+# data for each group
+
+# Extract data for each group
+group_D <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group D"]
+group_C <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group C"]
+group_A <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group A"]
+
+# Combine data from Group C and Group A
+group_combined <- c(group_C, group_A)
+
+# Create grouping labels
+group_labels <- c(rep("noDFD$noGPT", length(group_D)), 
+                  rep("noDFD$GPT & DFD$GPT", length(group_combined)))
+
+# Combine data into a dataframe
+combined_data <- data.frame(Value = c(group_D, group_combined), Groups = group_labels)
+```
+
+
+```{r}
+# Plot boxplot using ggplot2
+ggplot(combined_data, aes(x = Groups, y = Value, fill = Groups)) +
+  geom_boxplot() +
+  labs(title = "Interv1 by scenario", x = "scenario", y = "Accuracy")
+
+
+group_D <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group D"]
+group_C <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group C"]
+group_A <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group A"]
+
+# Combine data from Group C and Group A
+group_combined <- c(group_C, group_A)
+
+# Create grouping labels
+group_labels <- c(rep("noDFD$noGPT", length(group_D)), 
+                  rep("noDFD$GPT & DFD$GPT", length(group_combined)))
+
+# Combine data into a dataframe
+combined_data <- data.frame(Value = c(group_D, group_combined), Groups = group_labels)
+
+# Plot boxplot using ggplot2
+ggplot(combined_data, aes(x = Groups, y = Value, fill = Groups)) +
+  geom_boxplot() +
+  labs(title = "Interv2 by scenario", x = "scenario", y = "confidence level")
+
+
+```
+
+```{r}
+
+
+# Extract data for each group
+noDFD_GTP <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group C"]
+DFD_GTP <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group A"]
+noDFD_noGTP <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group D"]
+DFD_noGTP <- Analysis_E4$k8_Accuracy[Analysis_E4$Groups == "Group B"]
+
+# Combine data for each comparison
+group_C_vs_A <- c(noDFD_GTP, DFD_GTP)
+group_D_vs_BA <- c(noDFD_noGTP, DFD_noGTP, DFD_GTP)
+group_B_vs_A <- c(DFD_noGTP, DFD_GTP)
+group_labels <- c(
+  rep("noDFD&GTP vs DFD&GTP", length(group_C_vs_A)),
+  rep("noDFD&noGTP vs (DFD&noGTP union DFD&GTP)", length(group_D_vs_BA)),
+  rep("DFD&noGTP vs DFD&GTP", length(group_B_vs_A))
+)
+
+combined_data <- data.frame(Value = c(group_C_vs_A, group_D_vs_BA, group_B_vs_A), Groups = group_labels)
+
+ggplot(combined_data, aes(x = Groups, y = Value, fill = Groups)) +
+  geom_boxplot() +
+  labs(title = "interv1 by scenario", x = "scenarios", y = "Accuracy") +
+  theme(axis.text.x = element_text(angle = 15, hjust = 1))
+
+```
+```{r}
+noDFD_GTP <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group C"]
+DFD_GTP <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group A"]
+noDFD_noGTP <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group D"]
+DFD_noGTP <- Analysis_E4$confidence_level[Analysis_E4$Groups == "Group B"]
+group_C_vs_A <- c(noDFD_GTP, DFD_GTP)
+group_D_vs_BA <- c(noDFD_noGTP, DFD_noGTP, DFD_GTP)
+group_B_vs_A <- c(DFD_noGTP, DFD_GTP)
+
+group_labels <- c(
+  rep("noDFD&GTP vs DFD&GTP", length(group_C_vs_A)),
+  rep("noDFD&noGTP vs (DFD&noGTP union DFD&GTP)", length(group_D_vs_BA)),
+  rep("DFD&noGTP vs DFD&GTP", length(group_B_vs_A))
+)
+
+combined_data <- data.frame(Value = c(group_C_vs_A, group_D_vs_BA, group_B_vs_A), Groups = group_labels)
+
+ggplot(combined_data, aes(x = Groups, y = Value, fill = Groups)) +
+  geom_boxplot() +
+  labs(title = "interv2 by scenario", x = "scenarios", y = "confidence level") +
+  theme(axis.text.x = element_text(angle = 15, hjust = 1))
+```
+```{r}
+noDFD_GTP <- Analysis_E4$PerceivedCorrect_numeric[Analysis_E4$Groups == "Group C"]
+DFD_GTP <- Analysis_E4$PerceivedCorrect_numeric[Analysis_E4$Groups == "Group A"]
+noDFD_noGTP <- Analysis_E4$PerceivedCorrect_numeric[Analysis_E4$Groups == "Group D"]
+DFD_noGTP <- Analysis_E4$PerceivedCorrect_numeric[Analysis_E4$Groups == "Group B"]
+group_C_vs_A <- c(noDFD_GTP, DFD_GTP)
+group_D_vs_BA <- c(noDFD_noGTP, DFD_noGTP, DFD_GTP)
+group_B_vs_A <- c(DFD_noGTP, DFD_GTP)
+
+group_labels <- c(
+  rep("noDFD&GTP vs DFD&GTP", length(group_C_vs_A)),
+  rep("noDFD&noGTP vs (DFD&noGTP union DFD&GTP)", length(group_D_vs_BA)),
+  rep("DFD&noGTP vs DFD&GTP", length(group_B_vs_A))
+)
+
+combined_data <- data.frame(Value = c(group_C_vs_A, group_D_vs_BA, group_B_vs_A), Groups = group_labels)
+
+ggplot(combined_data, aes(x = Groups, y = Value, fill = Groups)) +
+  geom_boxplot() +
+  labs(title = "perception by scenario", x = "scenarios", y = "perception") +
+  theme(axis.text.x = element_text(angle = 15, hjust = 1))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
